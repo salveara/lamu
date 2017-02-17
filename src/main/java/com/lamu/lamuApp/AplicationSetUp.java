@@ -14,7 +14,7 @@ public class AplicationSetUp {
 	@Autowired
 	ClientDao clientDao;
 	
-	//@PostConstruct
+	@PostConstruct
 	public void setUp(){
 		Client client = new Client("santiago123", "123", "santiago", "santiago@mi.com", "3125845");
 		clientDao.save(client);
