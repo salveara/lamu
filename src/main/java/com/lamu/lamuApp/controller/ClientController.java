@@ -18,14 +18,18 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.lamu.lamuApp.business.ClientBusiness;
 import com.lamu.lamuApp.dao.ClientDao;
 import com.lamu.lamuApp.model.Client;
+import com.lamu.lamuApp.util.WebException;
 
 @RestController
 public class ClientController {
 
 	@Autowired
 	ClientDao clientDao;
+	
+	ClientBusiness clientBusiness = new ClientBusiness();
 
 	@RequestMapping(value = "/clients", method = RequestMethod.GET)
 	public @ResponseBody ResponseEntity<List<Client>> allClients(
@@ -44,9 +48,21 @@ public class ClientController {
 			@RequestParam(value = "email", required = false) String email,
 			@RequestParam(value = "phone", required = false) String phone) {
 		if (user != null && password != null) {
-			Client client = new Client(user, password, name, email, phone);
-			clientDao.save(client);
-			return new ResponseEntity<Client>(client, HttpStatus.CREATED);
+			
+			try {
+				
+				clientBusiness.CheckPassword(password);
+				
+				Client client = new Client(user, password, name, email, phone);
+				clientDao.save(client);
+				return new ResponseEntity<Client>(client, HttpStatus.CREATED);
+				
+			} catch (WebException webEx) {
+				System.out.println(webEx.getTechnicalMessage());
+				//esto hay que cambiarlo por un mensaje de error!!
+				return new ResponseEntity<Client>(HttpStatus.BAD_REQUEST);
+			}
+			
 		} else {
 			return new ResponseEntity<Client>(HttpStatus.BAD_REQUEST);
 		}
